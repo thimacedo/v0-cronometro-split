@@ -389,8 +389,38 @@ export default function Partilhas() {
           </div>
         </div>
 
+        {/* Notifications Settings */}
+        <div
+          className={`
+            bg-card border border-border rounded-xl p-4 mb-8
+            transition-opacity duration-200
+            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
+          `}
+        >
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
+            Notificacoes
+          </h2>
+          <div className="flex flex-col gap-4">
+            <Toggle
+              label="Sonora"
+              checked={soundEnabled}
+              onChange={setSoundEnabled}
+            />
+            <Toggle
+              label="Visual"
+              checked={visualEnabled}
+              onChange={setVisualEnabled}
+            />
+            <Toggle
+              label="Vibrar"
+              checked={vibrateEnabled}
+              onChange={setVibrateEnabled}
+            />
+          </div>
+        </div>
+
         {/* Control Buttons */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex gap-3">
           {!isRunning ? (
             <button
               onClick={handleStart}
@@ -427,36 +457,6 @@ export default function Partilhas() {
           >
             Zerar
           </button>
-        </div>
-
-        {/* Notifications Settings */}
-        <div
-          className={`
-            bg-card border border-border rounded-xl p-4
-            transition-opacity duration-200
-            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
-          `}
-        >
-          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
-            Notificacoes
-          </h2>
-          <div className="flex flex-col gap-4">
-            <Toggle
-              label="Sonora"
-              checked={soundEnabled}
-              onChange={setSoundEnabled}
-            />
-            <Toggle
-              label="Visual"
-              checked={visualEnabled}
-              onChange={setVisualEnabled}
-            />
-            <Toggle
-              label="Vibrar"
-              checked={vibrateEnabled}
-              onChange={setVibrateEnabled}
-            />
-          </div>
         </div>
 
         {/* Footer */}
