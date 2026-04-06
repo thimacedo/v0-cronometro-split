@@ -42,11 +42,14 @@ export default function SplitTimer() {
   const [p1Minutes, setP1Minutes] = useState(3)
   const [p2Minutes, setP2Minutes] = useState(2)
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const [visualEnabled, setVisualEnabled] = useState(true)
+  const [vibrateEnabled, setVibrateEnabled] = useState(true)
   const [timeLeft, setTimeLeft] = useState(0)
   const [currentPhase, setCurrentPhase] = useState<Phase>(0)
   const [isPaused, setIsPaused] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
+  const [isFlashing, setIsFlashing] = useState(false)
 
   const audioCtxRef = useRef<AudioContext | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -86,15 +89,36 @@ export default function SplitTimer() {
     [soundEnabled]
   )
 
+  const vibrate = useCallback((pattern: number | number[]) => {
+    if (!vibrateEnabled) return
+    if ("vibrate" in navigator) {
+      navigator.vibrate(pattern)
+    }
+  }, [vibrateEnabled])
+
+  const flashScreen = useCallback(() => {
+    if (!visualEnabled) return
+    setIsFlashing(true)
+    setTimeout(() => setIsFlashing(false), 150)
+    setTimeout(() => setIsFlashing(true), 300)
+    setTimeout(() => setIsFlashing(false), 450)
+    setTimeout(() => setIsFlashing(true), 600)
+    setTimeout(() => setIsFlashing(false), 750)
+  }, [visualEnabled])
+
   const playPhase1EndSound = useCallback(() => {
     playBeep(600, "sine", 0.8)
-  }, [playBeep])
+    vibrate([200, 100, 200])
+    flashScreen()
+  }, [playBeep, vibrate, flashScreen])
 
   const playFinalEndSound = useCallback(() => {
     playBeep(400, "square", 0.3)
     setTimeout(() => playBeep(400, "square", 0.3), 400)
     setTimeout(() => playBeep(400, "square", 0.8), 800)
-  }, [playBeep])
+    vibrate([300, 100, 300, 100, 500])
+    flashScreen()
+  }, [playBeep, vibrate, flashScreen])
 
   const requestWakeLock = useCallback(async () => {
     try {
@@ -213,7 +237,7 @@ export default function SplitTimer() {
 
   return (
     <div
-      className={`${style.bg} text-white min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-500`}
+      className={`${style.bg} ${isFlashing ? "!bg-white" : ""} text-white min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-150`}
     >
       <div className="w-full max-w-md p-6 bg-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm border border-slate-700">
         <div className="text-center mb-8">
@@ -274,17 +298,48 @@ export default function SplitTimer() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between px-2 pt-2">
-            <span className="text-sm font-medium text-slate-300">Notificacoes Sonoras</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={soundEnabled}
-                onChange={(e) => setSoundEnabled(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
+          <div className="p-4 bg-slate-800 rounded-xl border border-slate-600">
+            <label className="block text-sm font-medium text-slate-400 mb-3">
+              Notificacoes
             </label>
+            <div className="flex flex-col gap-3">
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-slate-300">Sonora</span>
+                <div className="relative inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={soundEnabled}
+                    onChange={(e) => setSoundEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
+                </div>
+              </label>
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-slate-300">Visual</span>
+                <div className="relative inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={visualEnabled}
+                    onChange={(e) => setVisualEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
+                </div>
+              </label>
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-slate-300">Vibrar</span>
+                <div className="relative inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={vibrateEnabled}
+                    onChange={(e) => setVibrateEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
+                </div>
+              </label>
+            </div>
           </div>
         </div>
 
