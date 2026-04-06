@@ -360,67 +360,37 @@ export default function Partilhas() {
         >
           <div className="flex flex-col items-center">
             <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Inicial</span>
-            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2">
+            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
               <input
                 type="number"
                 value={p1Minutes}
                 onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
                 min="0"
-                className="w-12 bg-transparent text-foreground text-center text-lg font-semibold focus:outline-none"
+                className="w-16 bg-transparent text-foreground text-center text-2xl font-semibold focus:outline-none"
               />
-              <span className="text-xs text-muted-foreground">min</span>
+              <span className="text-sm text-muted-foreground">min</span>
             </div>
           </div>
 
-          <span className="text-2xl font-light text-muted-foreground mt-6">+</span>
+          <span className="text-3xl font-light text-muted-foreground mt-6">+</span>
 
           <div className="flex flex-col items-center">
             <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Final</span>
-            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2">
+            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
               <input
                 type="number"
                 value={p2Minutes}
                 onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
                 min="0"
-                className="w-12 bg-transparent text-foreground text-center text-lg font-semibold focus:outline-none"
+                className="w-16 bg-transparent text-foreground text-center text-2xl font-semibold focus:outline-none"
               />
-              <span className="text-xs text-muted-foreground">min</span>
+              <span className="text-sm text-muted-foreground">min</span>
             </div>
           </div>
         </div>
 
-        {/* Notifications Settings */}
-        <div
-          className={`
-            bg-card border border-border rounded-xl p-4 mb-8
-            transition-opacity duration-200
-            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
-          `}
-        >
-          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
-            Notificacoes
-          </h2>
-          <div className="flex flex-col gap-4">
-            <Toggle
-              label="Sonora"
-              checked={soundEnabled}
-              onChange={setSoundEnabled}
-            />
-            <Toggle
-              label="Visual"
-              checked={visualEnabled}
-              onChange={setVisualEnabled}
-            />
-            <Toggle
-              label="Vibrar"
-              checked={vibrateEnabled}
-              onChange={setVibrateEnabled}
-            />
-          </div>
-        </div>
-
         {/* Control Buttons */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 mb-6">
           {!isRunning ? (
             <button
               onClick={handleStart}
@@ -457,6 +427,36 @@ export default function Partilhas() {
           >
             Zerar
           </button>
+        </div>
+
+        {/* Notifications Settings */}
+        <div
+          className={`
+            bg-card border border-border rounded-xl p-4
+            transition-opacity duration-200
+            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
+          `}
+        >
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
+            Notificacoes
+          </h2>
+          <div className="flex flex-col gap-4">
+            <Toggle
+              label="Sonora"
+              checked={soundEnabled}
+              onChange={setSoundEnabled}
+            />
+            <Toggle
+              label="Visual"
+              checked={visualEnabled}
+              onChange={setVisualEnabled}
+            />
+            <Toggle
+              label="Vibrar"
+              checked={vibrateEnabled}
+              onChange={setVibrateEnabled}
+            />
+          </div>
         </div>
 
         {/* Footer */}
