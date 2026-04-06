@@ -253,6 +253,42 @@ export default function SplitTimer() {
           </div>
         </div>
 
+        <div
+          className={`flex items-center justify-center gap-3 mb-6 transition-opacity ${
+            isRunning || isPaused ? "opacity-50 pointer-events-none" : ""
+          }`}
+        >
+          <div className="flex flex-col items-center">
+            <label className="text-xs font-medium text-slate-400 mb-1">Fase 1</label>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={p1Minutes}
+                onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-slate-400">min</span>
+            </div>
+          </div>
+
+          <span className="text-3xl font-bold text-slate-400 mt-4">+</span>
+
+          <div className="flex flex-col items-center">
+            <label className="text-xs font-medium text-slate-400 mb-1">Fase 2</label>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={p2Minutes}
+                onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="text-sm text-slate-400">min</span>
+            </div>
+          </div>
+        </div>
+
         <div className="flex flex-col justify-center items-center mb-8">
           <span className="text-8xl font-mono font-bold tracking-tighter">
             {formatTime(timeLeft)}
@@ -271,47 +307,6 @@ export default function SplitTimer() {
             isRunning || isPaused ? "opacity-50 pointer-events-none" : ""
           }`}
         >
-          <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-600">
-            <div>
-              <label className="block text-sm font-medium text-slate-400">
-                Tempo Inicial (Fase 1)
-              </label>
-              <span className="text-xs text-slate-500">Ex: 3 ou 5 minutos</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={p1Minutes}
-                onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-                min="0"
-                className="w-16 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-slate-400">min</span>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <span className="text-3xl font-bold text-slate-400">+</span>
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-600">
-            <div>
-              <label className="block text-sm font-medium text-slate-400">
-                Tempo Final (Fase 2)
-              </label>
-              <span className="text-xs text-slate-500">Ex: 2 ou 1 minuto</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={p2Minutes}
-                onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-                min="0"
-                className="w-16 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-slate-400">min</span>
-            </div>
-          </div>
 
           <div className="p-4 bg-slate-800 rounded-xl border border-slate-600">
             <label className="block text-sm font-medium text-slate-400 mb-3">
