@@ -7,9 +7,16 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Partilhas - Cronometro de Fases',
+  description: 'Cronometro profissional com duas fases para gerenciamento de tempo',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  themeColor: '#2B348A',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Partilhas',
+  },
   icons: {
     icon: [
       {
