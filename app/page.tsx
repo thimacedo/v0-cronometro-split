@@ -4,32 +4,12 @@ import { useState, useEffect, useRef, useCallback } from "react"
 
 type Phase = 0 | 1 | 2
 
-const phaseStyles: Record<Phase | "paused" | "finished", { bg: string; badge: string; badgeText: string }> = {
-  0: {
-    bg: "bg-[#2B348A]",
-    badge: "bg-[#1e2563] text-blue-200",
-    badgeText: "Aguardando Configuracao",
-  },
-  1: {
-    bg: "bg-[#2B348A]",
-    badge: "bg-[#3d47a3] text-blue-100",
-    badgeText: "Tempo Inicial",
-  },
-  2: {
-    bg: "bg-orange-700",
-    badge: "bg-orange-600 text-orange-100",
-    badgeText: "Tempo Final (Atencao)",
-  },
-  paused: {
-    bg: "bg-[#2B348A]",
-    badge: "bg-yellow-600 text-yellow-100",
-    badgeText: "Pausado",
-  },
-  finished: {
-    bg: "bg-red-800",
-    badge: "bg-red-600 text-red-100",
-    badgeText: "Tempo Esgotado",
-  },
+const phaseConfig = {
+  0: { label: "Pronto para iniciar", color: "text-muted-foreground" },
+  1: { label: "Tempo Inicial", color: "text-primary" },
+  2: { label: "Tempo Final", color: "text-accent" },
+  paused: { label: "Pausado", color: "text-yellow-400" },
+  finished: { label: "Tempo Esgotado", color: "text-destructive" },
 }
 
 function formatTime(seconds: number): string {
@@ -38,7 +18,90 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`
 }
 
-export default function SplitTimer() {
+function CircularProgress({ 
+  progress, 
+  phase,
+  size = 280,
+  strokeWidth = 8 
+}: { 
+  progress: number
+  phase: Phase | "paused" | "finished"
+  size?: number
+  strokeWidth?: number
+}) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = radius * 2 * Math.PI
+  const offset = circumference - (progress / 100) * circumference
+
+  const getStrokeColor = () => {
+    if (phase === "finished") return "stroke-destructive"
+    if (phase === "paused") return "stroke-yellow-400"
+    if (phase === 2) return "stroke-accent"
+    return "stroke-primary"
+  }
+
+  return (
+    <svg width={size} height={size} className="transform -rotate-90">
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        className="text-border/30"
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        className={`${getStrokeColor()} transition-all duration-300`}
+      />
+    </svg>
+  )
+}
+
+function Toggle({ 
+  checked, 
+  onChange, 
+  label 
+}: { 
+  checked: boolean
+  onChange: (checked: boolean) => void
+  label: string
+}) {
+  return (
+    <label className="flex items-center justify-between cursor-pointer group">
+      <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+        {label}
+      </span>
+      <button
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`
+          relative w-11 h-6 rounded-full transition-colors duration-200
+          ${checked ? "bg-primary" : "bg-secondary"}
+        `}
+      >
+        <span
+          className={`
+            absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm
+            transition-transform duration-200
+            ${checked ? "translate-x-5" : "translate-x-0"}
+          `}
+        />
+      </button>
+    </label>
+  )
+}
+
+export default function Partilhas() {
   const [p1Minutes, setP1Minutes] = useState(3)
   const [p2Minutes, setP2Minutes] = useState(2)
   const [soundEnabled, setSoundEnabled] = useState(true)
@@ -51,6 +114,7 @@ export default function SplitTimer() {
   const [isFinished, setIsFinished] = useState(false)
   const [isFlashing, setIsFlashing] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
+  const [totalTime, setTotalTime] = useState(0)
 
   const audioCtxRef = useRef<AudioContext | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -201,6 +265,7 @@ export default function SplitTimer() {
       const initialTime = p1SecondsRef.current > 0 ? p1SecondsRef.current : p2SecondsRef.current
       const initialPhase: Phase = p1SecondsRef.current > 0 ? 1 : 2
 
+      setTotalTime(p1SecondsRef.current + p2SecondsRef.current)
       setTimeLeft(initialTime)
       setCurrentPhase(initialPhase)
     }
@@ -222,154 +287,184 @@ export default function SplitTimer() {
     setIsFinished(false)
     setCurrentPhase(0)
     setTimeLeft(0)
+    setTotalTime(0)
   }
 
-  const getStyle = () => {
-    if (isFinished) return phaseStyles.finished
-    if (isPaused) return phaseStyles.paused
-    return phaseStyles[currentPhase]
+  const getPhaseKey = (): Phase | "paused" | "finished" => {
+    if (isFinished) return "finished"
+    if (isPaused) return "paused"
+    return currentPhase
   }
 
-  const style = getStyle()
+  const phaseKey = getPhaseKey()
+  const config = phaseConfig[phaseKey]
 
   const getButtonText = () => {
     if (isPaused) return "Retomar"
     if (isFinished) return "Reiniciar"
-    if (isRunning) return "Iniciar"
     return "Iniciar"
+  }
+
+  const calculateProgress = () => {
+    if (totalTime === 0) return 100
+    const elapsed = totalTime - (currentPhase === 1 ? timeLeft + p2SecondsRef.current : timeLeft)
+    return Math.max(0, ((totalTime - elapsed) / totalTime) * 100)
   }
 
   return (
     <div
-      className={`${style.bg} ${isFlashing ? "!bg-white" : ""} text-white min-h-screen flex flex-col items-center justify-center font-sans transition-colors duration-150`}
+      className={`
+        min-h-screen flex flex-col items-center justify-center p-4
+        bg-background transition-colors duration-150
+        ${isFlashing ? "!bg-white" : ""}
+      `}
     >
-      <div className="w-full max-w-md p-6 bg-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm border border-slate-700">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-200 mb-2">Partilhas</h1>
-          <div
-            className={`inline-block px-4 py-1 rounded-full text-sm font-semibold ${style.badge}`}
-          >
-            {style.badgeText}
+      <div className="w-full max-w-sm">
+        {/* Header */}
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-1">
+            Partilhas
+          </h1>
+          <p className={`text-sm font-medium ${config.color} transition-colors`}>
+            {config.label}
+          </p>
+        </header>
+
+        {/* Timer Display */}
+        <div className="relative flex items-center justify-center mb-8">
+          <CircularProgress 
+            progress={calculateProgress()} 
+            phase={phaseKey}
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-6xl font-mono font-bold tracking-tight text-foreground">
+              {formatTime(timeLeft)}
+            </span>
+            {notificationMessage && (
+              <div className="mt-2 px-4 py-2 bg-primary/20 rounded-lg animate-pulse">
+                <span className="text-sm font-medium text-primary">
+                  {notificationMessage}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
+        {/* Time Inputs */}
         <div
-          className={`flex items-center justify-center gap-3 mb-6 transition-opacity ${
-            isRunning || isPaused ? "opacity-50 pointer-events-none" : ""
-          }`}
+          className={`
+            flex items-center justify-center gap-4 mb-8
+            transition-opacity duration-200
+            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
+          `}
         >
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              value={p1Minutes}
-              onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-              min="0"
-              className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="text-sm text-slate-400">min</span>
-          </div>
-
-          <span className="text-3xl font-bold text-slate-400">+</span>
-
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              value={p2Minutes}
-              onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-              min="0"
-              className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="text-sm text-slate-400">min</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col justify-center items-center mb-8">
-          <span className="text-8xl font-mono font-bold tracking-tighter">
-            {formatTime(timeLeft)}
-          </span>
-          {notificationMessage && (
-            <div className="mt-4 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-xl animate-pulse">
-              <span className="text-xl font-semibold text-white">
-                {notificationMessage}
-              </span>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Inicial</span>
+            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2">
+              <input
+                type="number"
+                value={p1Minutes}
+                onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                className="w-12 bg-transparent text-foreground text-center text-lg font-semibold focus:outline-none"
+              />
+              <span className="text-xs text-muted-foreground">min</span>
             </div>
-          )}
-        </div>
+          </div>
 
-        <div
-          className={`space-y-4 mb-8 transition-opacity ${
-            isRunning || isPaused ? "opacity-50 pointer-events-none" : ""
-          }`}
-        >
+          <span className="text-2xl font-light text-muted-foreground mt-6">+</span>
 
-          <div className="p-4 bg-slate-800 rounded-xl border border-slate-600">
-            <label className="block text-sm font-medium text-slate-400 mb-3">
-              Notificacoes
-            </label>
-            <div className="flex flex-col gap-3">
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm text-slate-300">Sonora</span>
-                <div className="relative inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={soundEnabled}
-                    onChange={(e) => setSoundEnabled(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
-                </div>
-              </label>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm text-slate-300">Visual</span>
-                <div className="relative inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={visualEnabled}
-                    onChange={(e) => setVisualEnabled(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
-                </div>
-              </label>
-              <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm text-slate-300">Vibrar</span>
-                <div className="relative inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={vibrateEnabled}
-                    onChange={(e) => setVibrateEnabled(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" />
-                </div>
-              </label>
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Final</span>
+            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2">
+              <input
+                type="number"
+                value={p2Minutes}
+                onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                className="w-12 bg-transparent text-foreground text-center text-lg font-semibold focus:outline-none"
+              />
+              <span className="text-xs text-muted-foreground">min</span>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-4">
+        {/* Control Buttons */}
+        <div className="flex gap-3 mb-8">
           {!isRunning ? (
             <button
               onClick={handleStart}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-colors text-lg"
+              className="
+                flex-1 py-4 rounded-xl font-semibold text-base
+                bg-primary text-primary-foreground
+                hover:bg-primary/90 active:scale-[0.98]
+                transition-all duration-150
+              "
             >
               {getButtonText()}
             </button>
           ) : (
             <button
               onClick={handlePause}
-              className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 rounded-xl transition-colors text-lg"
+              className="
+                flex-1 py-4 rounded-xl font-semibold text-base
+                bg-yellow-500 text-yellow-950
+                hover:bg-yellow-400 active:scale-[0.98]
+                transition-all duration-150
+              "
             >
               Pausar
             </button>
           )}
           <button
             onClick={handleReset}
-            className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-xl transition-colors text-lg"
+            className="
+              flex-1 py-4 rounded-xl font-semibold text-base
+              bg-secondary text-secondary-foreground
+              hover:bg-secondary/80 active:scale-[0.98]
+              transition-all duration-150
+            "
           >
             Zerar
           </button>
         </div>
+
+        {/* Notifications Settings */}
+        <div
+          className={`
+            bg-card border border-border rounded-xl p-4
+            transition-opacity duration-200
+            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
+          `}
+        >
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
+            Notificacoes
+          </h2>
+          <div className="flex flex-col gap-4">
+            <Toggle
+              label="Sonora"
+              checked={soundEnabled}
+              onChange={setSoundEnabled}
+            />
+            <Toggle
+              label="Visual"
+              checked={visualEnabled}
+              onChange={setVisualEnabled}
+            />
+            <Toggle
+              label="Vibrar"
+              checked={vibrateEnabled}
+              onChange={setVibrateEnabled}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-8 text-center">
+          <p className="text-xs text-muted-foreground/60">
+            Mantenha a tela ativa durante o uso
+          </p>
+        </footer>
       </div>
     </div>
   )
