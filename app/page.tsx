@@ -122,7 +122,6 @@ export default function Partilhas() {
   const [totalTime, setTotalTime] = useState(0)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const audioCtxRef = useRef<AudioContext | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -359,20 +358,9 @@ export default function Partilhas() {
         ${isFlashing ? "!bg-white" : ""}
       `}
     >
-      {/* Toast Notification - Centro da tela */}
-      {notificationMessage && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-card border border-border shadow-2xl rounded-2xl px-8 py-6 animate-in zoom-in-95 fade-in duration-300">
-            <p className="text-2xl font-bold text-foreground text-center">
-              {notificationMessage}
-            </p>
-          </div>
-        </div>
-      )}
-
       <div className="w-full max-w-sm">
         {/* Install Prompt */}
-        {showInstallPrompt && !isFullscreen && (
+        {showInstallPrompt && (
           <div className="mb-6 bg-card border border-border rounded-xl p-4 animate-in slide-in-from-top-4 duration-300">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -440,39 +428,14 @@ export default function Partilhas() {
         )}
 
         {/* Header */}
-        {!isFullscreen && (
-          <header className="text-center mb-8">
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-1">
-              Partilhas
-            </h1>
-            <p className={`text-sm font-medium ${config.color} transition-colors`}>
-              {config.label}
-            </p>
-          </header>
-        )}
-
-        {/* Fullscreen Toggle Button */}
-        <button
-          onClick={() => setIsFullscreen(!isFullscreen)}
-          className="absolute top-4 right-4 p-2 rounded-lg bg-card border border-border hover:bg-secondary transition-colors"
-          aria-label={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
-        >
-          {isFullscreen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground">
-              <polyline points="4 14 10 14 10 20" />
-              <polyline points="20 10 14 10 14 4" />
-              <line x1="14" x2="21" y1="10" y2="3" />
-              <line x1="3" x2="10" y1="21" y2="14" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-foreground">
-              <polyline points="15 3 21 3 21 9" />
-              <polyline points="9 21 3 21 3 15" />
-              <line x1="21" x2="14" y1="3" y2="10" />
-              <line x1="3" x2="10" y1="21" y2="14" />
-            </svg>
-          )}
-        </button>
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-1">
+            Partilhas
+          </h1>
+          <p className={`text-sm font-medium ${config.color} transition-colors`}>
+            {config.label}
+          </p>
+        </header>
 
         {/* Timer Display */}
         <div className="relative flex items-center justify-center mb-8">
@@ -484,49 +447,54 @@ export default function Partilhas() {
             <span className="text-6xl font-mono font-bold tracking-tight text-foreground">
               {formatTime(timeLeft)}
             </span>
+            {notificationMessage && (
+              <div className="mt-2 px-4 py-2 bg-primary/20 rounded-lg animate-pulse">
+                <span className="text-sm font-medium text-primary">
+                  {notificationMessage}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Time Inputs */}
-        {!isFullscreen && (
-          <div
-            className={`
-              flex items-center justify-center gap-4 mb-8
-              transition-opacity duration-200
-              ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
-            `}
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Inicial</span>
-              <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
-                <input
-                  type="number"
-                  value={p1Minutes}
-                  onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-                  min="0"
-                  className="w-16 bg-transparent text-foreground text-center text-2xl font-semibold focus:outline-none"
-                />
-                <span className="text-sm text-muted-foreground">min</span>
-              </div>
-            </div>
-
-            <span className="text-3xl font-light text-muted-foreground mt-6">+</span>
-
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Final</span>
-              <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
-                <input
-                  type="number"
-                  value={p2Minutes}
-                  onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-                  min="0"
-                  className="w-16 bg-transparent text-foreground text-center text-2xl font-semibold focus:outline-none"
-                />
-                <span className="text-sm text-muted-foreground">min</span>
-              </div>
+        <div
+          className={`
+            flex items-center justify-center gap-4 mb-8
+            transition-opacity duration-200
+            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
+          `}
+        >
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Inicial</span>
+            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
+              <input
+                type="number"
+                value={p1Minutes}
+                onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                className="w-16 bg-transparent text-foreground text-center text-2xl font-semibold focus:outline-none"
+              />
+              <span className="text-sm text-muted-foreground">min</span>
             </div>
           </div>
-        )}
+
+          <span className="text-3xl font-light text-muted-foreground mt-6">+</span>
+
+          <div className="flex flex-col items-center">
+            <span className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">Final</span>
+            <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-3">
+              <input
+                type="number"
+                value={p2Minutes}
+                onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+                min="0"
+                className="w-16 bg-transparent text-foreground text-center text-2xl font-semibold focus:outline-none"
+              />
+              <span className="text-sm text-muted-foreground">min</span>
+            </div>
+          </div>
+        </div>
 
         {/* Control Buttons */}
         <div className="flex gap-3 mb-6">
@@ -569,45 +537,41 @@ export default function Partilhas() {
         </div>
 
         {/* Notifications Settings */}
-        {!isFullscreen && (
-          <div
-            className={`
-              bg-card border border-border rounded-xl p-4
-              transition-opacity duration-200
-              ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
-            `}
-          >
-            <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
-              Notificacoes
-            </h2>
-            <div className="flex flex-col gap-4">
-              <Toggle
-                label="Sonora"
-                checked={soundEnabled}
-                onChange={setSoundEnabled}
-              />
-              <Toggle
-                label="Visual"
-                checked={visualEnabled}
-                onChange={setVisualEnabled}
-              />
-              <Toggle
-                label="Vibrar"
-                checked={vibrateEnabled}
-                onChange={setVibrateEnabled}
-              />
-            </div>
+        <div
+          className={`
+            bg-card border border-border rounded-xl p-4
+            transition-opacity duration-200
+            ${isRunning || isPaused ? "opacity-40 pointer-events-none" : ""}
+          `}
+        >
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
+            Notificacoes
+          </h2>
+          <div className="flex flex-col gap-4">
+            <Toggle
+              label="Sonora"
+              checked={soundEnabled}
+              onChange={setSoundEnabled}
+            />
+            <Toggle
+              label="Visual"
+              checked={visualEnabled}
+              onChange={setVisualEnabled}
+            />
+            <Toggle
+              label="Vibrar"
+              checked={vibrateEnabled}
+              onChange={setVibrateEnabled}
+            />
           </div>
-        )}
+        </div>
 
         {/* Footer */}
-        {!isFullscreen && (
-          <footer className="mt-8 text-center">
-            <p className="text-xs text-muted-foreground/60">
-              Mantenha a tela ativa durante o uso
-            </p>
-          </footer>
-        )}
+        <footer className="mt-8 text-center">
+          <p className="text-xs text-muted-foreground/60">
+            Mantenha a tela ativa durante o uso
+          </p>
+        </footer>
       </div>
     </div>
   )
