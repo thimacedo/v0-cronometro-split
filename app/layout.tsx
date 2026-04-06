@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: 'Partilhas - Cronometro de Fases',
   description: 'Cronometro profissional com duas fases para gerenciamento de tempo',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  themeColor: '#2B348A',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Partilhas',
+  },
   icons: {
     icon: [
       {

@@ -2,6 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
+}
+
 type Phase = 0 | 1 | 2
 
 const phaseConfig = {
@@ -115,6 +120,8 @@ export default function Partilhas() {
   const [isFlashing, setIsFlashing] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [totalTime, setTotalTime] = useState(0)
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 
   const audioCtxRef = useRef<AudioContext | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -210,6 +217,38 @@ export default function Partilhas() {
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
   }, [currentPhase, requestWakeLock])
+
+  // PWA Install Prompt
+  useEffect(() => {
+    const dismissed = localStorage.getItem("partilhas-install-dismissed")
+    if (dismissed) return
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
+      setTimeout(() => setShowInstallPrompt(true), 2000)
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return
+    
+    deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+    
+    if (outcome === "accepted") {
+      setShowInstallPrompt(false)
+    }
+    setDeferredPrompt(null)
+  }
+
+  const handleDismissInstall = () => {
+    setShowInstallPrompt(false)
+    localStorage.setItem("partilhas-install-dismissed", "true")
+  }
 
   useEffect(() => {
     if (!isRunning || isPaused) return
@@ -320,6 +359,74 @@ export default function Partilhas() {
       `}
     >
       <div className="w-full max-w-sm">
+        {/* Install Prompt */}
+        {showInstallPrompt && (
+          <div className="mb-6 bg-card border border-border rounded-xl p-4 animate-in slide-in-from-top-4 duration-300">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="text-primary"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground mb-1">
+                  Adicionar a tela inicial
+                </h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Instale o Partilhas para acesso rapido, como um app nativo.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleInstallClick}
+                    className="px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Instalar
+                  </button>
+                  <button
+                    onClick={handleDismissInstall}
+                    className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Agora nao
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={handleDismissInstall}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Fechar"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="16" 
+                  height="16" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <header className="text-center mb-8">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-1">
