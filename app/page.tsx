@@ -6,27 +6,27 @@ type Phase = 0 | 1 | 2
 
 const phaseStyles: Record<Phase | "paused" | "finished", { bg: string; badge: string; badgeText: string }> = {
   0: {
-    bg: "bg-slate-900",
-    badge: "bg-slate-700 text-slate-300",
+    bg: "bg-[#2B348A]",
+    badge: "bg-[#1e2563] text-blue-200",
     badgeText: "Aguardando Configuracao",
   },
   1: {
-    bg: "bg-indigo-900",
-    badge: "bg-indigo-700 text-indigo-100",
+    bg: "bg-[#2B348A]",
+    badge: "bg-[#3d47a3] text-blue-100",
     badgeText: "Tempo Inicial",
   },
   2: {
-    bg: "bg-orange-800",
+    bg: "bg-orange-700",
     badge: "bg-orange-600 text-orange-100",
     badgeText: "Tempo Final (Atencao)",
   },
   paused: {
-    bg: "bg-slate-900",
+    bg: "bg-[#2B348A]",
     badge: "bg-yellow-600 text-yellow-100",
     badgeText: "Pausado",
   },
   finished: {
-    bg: "bg-red-900",
+    bg: "bg-red-800",
     badge: "bg-red-600 text-red-100",
     badgeText: "Tempo Esgotado",
   },
@@ -50,6 +50,7 @@ export default function SplitTimer() {
   const [isRunning, setIsRunning] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   const [isFlashing, setIsFlashing] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
 
   const audioCtxRef = useRef<AudioContext | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
@@ -96,20 +97,22 @@ export default function SplitTimer() {
     }
   }, [vibrateEnabled])
 
-  const flashScreen = useCallback(() => {
+  const flashScreen = useCallback((message: string) => {
     if (!visualEnabled) return
+    setNotificationMessage(message)
     setIsFlashing(true)
     setTimeout(() => setIsFlashing(false), 150)
     setTimeout(() => setIsFlashing(true), 300)
     setTimeout(() => setIsFlashing(false), 450)
     setTimeout(() => setIsFlashing(true), 600)
     setTimeout(() => setIsFlashing(false), 750)
+    setTimeout(() => setNotificationMessage(null), 3000)
   }, [visualEnabled])
 
-  const playPhase1EndSound = useCallback(() => {
+  const playPhase1EndSound = useCallback((minutesLeft: number) => {
     playBeep(600, "sine", 0.8)
     vibrate([200, 100, 200])
-    flashScreen()
+    flashScreen(`Faltam ${minutesLeft} ${minutesLeft === 1 ? "minuto" : "minutos"}`)
   }, [playBeep, vibrate, flashScreen])
 
   const playFinalEndSound = useCallback(() => {
@@ -117,7 +120,7 @@ export default function SplitTimer() {
     setTimeout(() => playBeep(400, "square", 0.3), 400)
     setTimeout(() => playBeep(400, "square", 0.8), 800)
     vibrate([300, 100, 300, 100, 500])
-    flashScreen()
+    flashScreen("Seu tempo acabou")
   }, [playBeep, vibrate, flashScreen])
 
   const requestWakeLock = useCallback(async () => {
@@ -164,7 +167,8 @@ export default function SplitTimer() {
 
     if (timeLeft === 0) {
       if (currentPhase === 1) {
-        playPhase1EndSound()
+        const minutesLeft = Math.ceil(p2SecondsRef.current / 60)
+        playPhase1EndSound(minutesLeft)
         if (p2SecondsRef.current > 0) {
           setCurrentPhase(2)
           setTimeLeft(p2SecondsRef.current)
@@ -241,7 +245,7 @@ export default function SplitTimer() {
     >
       <div className="w-full max-w-md p-6 bg-slate-800/50 rounded-2xl shadow-2xl backdrop-blur-sm border border-slate-700">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-200 mb-2">Cronometro Split</h1>
+          <h1 className="text-2xl font-bold text-slate-200 mb-2">Partilhas</h1>
           <div
             className={`inline-block px-4 py-1 rounded-full text-sm font-semibold ${style.badge}`}
           >
@@ -249,10 +253,17 @@ export default function SplitTimer() {
           </div>
         </div>
 
-        <div className="flex justify-center items-baseline mb-8">
+        <div className="flex flex-col justify-center items-center mb-8">
           <span className="text-8xl font-mono font-bold tracking-tighter">
             {formatTime(timeLeft)}
           </span>
+          {notificationMessage && (
+            <div className="mt-4 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-xl animate-pulse">
+              <span className="text-xl font-semibold text-white">
+                {notificationMessage}
+              </span>
+            </div>
+          )}
         </div>
 
         <div
@@ -277,6 +288,10 @@ export default function SplitTimer() {
               />
               <span className="text-slate-400">min</span>
             </div>
+          </div>
+
+          <div className="flex justify-center">
+            <span className="text-3xl font-bold text-slate-400">+</span>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-slate-800 rounded-xl border border-slate-600">
