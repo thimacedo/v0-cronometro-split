@@ -258,34 +258,28 @@ export default function SplitTimer() {
             isRunning || isPaused ? "opacity-50 pointer-events-none" : ""
           }`}
         >
-          <div className="flex flex-col items-center">
-            <label className="text-xs font-medium text-slate-400 mb-1">Fase 1</label>
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={p1Minutes}
-                onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-                min="0"
-                className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-sm text-slate-400">min</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              value={p1Minutes}
+              onChange={(e) => setP1Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+              min="0"
+              className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-slate-400">min</span>
           </div>
 
-          <span className="text-3xl font-bold text-slate-400 mt-4">+</span>
+          <span className="text-3xl font-bold text-slate-400">+</span>
 
-          <div className="flex flex-col items-center">
-            <label className="text-xs font-medium text-slate-400 mb-1">Fase 2</label>
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={p2Minutes}
-                onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
-                min="0"
-                className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-sm text-slate-400">min</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              value={p2Minutes}
+              onChange={(e) => setP2Minutes(Math.max(0, parseInt(e.target.value) || 0))}
+              min="0"
+              className="w-14 bg-slate-700 text-white text-center rounded-lg py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-slate-400">min</span>
           </div>
         </div>
 
