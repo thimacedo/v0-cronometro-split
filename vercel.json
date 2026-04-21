@@ -1,0 +1,10 @@
+{
+  "github": {
+    "silent": true
+  },
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "rootDirectory": "frontend"
+}
