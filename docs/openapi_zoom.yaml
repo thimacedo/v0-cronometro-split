@@ -4,8 +4,8 @@ info:
   description: API de sincronização e gestão de cronómetro colaborativo para o ecossistema Zoom Workplace.
   version: 1.2.0
 servers:
-  - url: https://your-production-domain.com
-    description: Servidor de Produção (HTTPS obrigatório para o Zoom)
+  - url: https://v0-cronometro-split.onrender.com
+    description: Servidor de Produção (Render) - HTTPS obrigatório para o Zoom
 
 paths:
   /api/auth/login:
