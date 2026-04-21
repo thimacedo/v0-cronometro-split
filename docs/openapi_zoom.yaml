@@ -1,0 +1,101 @@
+openapi: 3.0.0
+info:
+  title: SPH_Partilhas - Zoom App Backend
+  description: API de sincronização e gestão de cronómetro colaborativo para o ecossistema Zoom Workplace.
+  version: 1.2.0
+servers:
+  - url: https://your-production-domain.com
+    description: Servidor de Produção (HTTPS obrigatório para o Zoom)
+
+paths:
+  /api/auth/login:
+    get:
+      summary: Iniciar Fluxo OAuth 2.0
+      description: Redireciona o utilizador para a página de consentimento do Zoom.
+      responses:
+        '302':
+          description: Redirecionamento para o Zoom OAuth.
+
+  /api/auth/callback:
+    get:
+      summary: Callback de Autorização
+      description: Endpoint que recebe o 'code' do Zoom para troca por tokens de acesso.
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Código de autorização temporário fornecido pelo Zoom.
+      responses:
+        '200':
+          description: Autenticação bem-sucedida.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  access_token:
+                    type: string
+
+  /api/webhooks/events:
+    post:
+      summary: Receção de Eventos (Webhooks)
+      description: Processa eventos do Zoom (Meeting Start/End) e validação de URL de endpoint.
+      parameters:
+        - name: x-zm-signature
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Assinatura HMAC SHA-256 para validação de segurança.
+        - name: x-zm-request-timestamp
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Timestamp da requisição para evitar replay attacks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event:
+                  type: string
+                  example: endpoint.url_validation
+                payload:
+                  type: object
+                  properties:
+                    plainToken:
+                      type: string
+      responses:
+        '200':
+          description: Confirmação de receção ou resposta ao desafio de validação de URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plainToken:
+                    type: string
+                  encryptedToken:
+                    type: string
+        '401':
+          description: Assinatura inválida.
+
+components:
+  securitySchemes:
+    ZoomAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://zoom.us/oauth/authorize
+          tokenUrl: https://zoom.us/oauth/token
+          scopes:
+            app:run: Iniciar a aplicação no Zoom
+            meeting:read: Ler informações da reunião
+            meeting:write: Gerir reuniões
