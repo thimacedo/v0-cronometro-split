@@ -20,8 +20,8 @@ def fix_render_config():
     data = {
         "serviceDetails": {
             "env": "python3",
-            "buildCommand": "pip install -r backend/requirements.txt",
-            "startCommand": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+            "buildCommand": "./build.sh",
+            "startCommand": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
         }
     }
     

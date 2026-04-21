@@ -8,12 +8,20 @@ import { TimerControls } from './components/TimerControls';
 import { PhaseSelector } from './components/PhaseSelector';
 
 /**
- * 🔷 SPH Partilhas - Interface de Cronômetro Simplificada
- * Focada em objetividade e sincronização em tempo real.
+ * 🔷 SPH Partilhas - Interface de Cronômetro Sincronizada
  */
 function ZoomAppContent() {
   const [meetingUUID, setMeetingUUID] = useState<string | null>(null);
-  const { time, isRunning, phase, setPhase, sendAction } = useTimerSocket(meetingUUID);
+  
+  // Executa o hook do socket. 
+  // Se o hook falhar por algum motivo interno, ele deve retornar valores padrão.
+  const timer = useTimerSocket(meetingUUID);
+  
+  const time = timer?.time ?? 0;
+  const isRunning = timer?.isRunning ?? false;
+  const phase = timer?.phase ?? 'Partilha';
+  const setPhase = timer?.setPhase;
+  const sendAction = timer?.sendAction;
 
   useEffect(() => {
     const initializeZoom = async () => {
@@ -29,7 +37,11 @@ function ZoomAppContent() {
           ],
         });
         const context = await zoomSdk.getMeetingContext();
-        setMeetingUUID(context?.meetingUUID || 'browser-test-id');
+        if (context && context.meetingUUID) {
+          setMeetingUUID(context.meetingUUID);
+        } else {
+          setMeetingUUID('browser-test-id');
+        }
       } catch (error) {
         console.error('🔷 Zoom SDK Error:', error);
         setMeetingUUID('dev-local-id');
@@ -40,23 +52,28 @@ function ZoomAppContent() {
 
   return (
     <div className="w-full max-w-[280px] flex flex-col items-center">
-      {/* Selector de Modo (Simplificado) */}
+      {/* Selector de Modo */}
       <PhaseSelector 
-        currentPhase={phase || 'Partilha'} 
+        currentPhase={phase} 
         onSelect={(p) => {
-          setPhase(p);
-          sendAction('reset', { phase: p });
+          if (setPhase) setPhase(p);
+          if (sendAction) sendAction('reset', { phase: p });
         }} 
       />
 
-      {/* Display do Tempo (Protagonista) */}
-      <TimerDisplay time={time || 0} />
+      {/* Display do Tempo */}
+      <TimerDisplay time={time} />
 
-      {/* Controlos de Ação (Acessibilidade e Rapidez) */}
+      {/* Controlos de Ação */}
       <TimerControls 
-        isRunning={isRunning || false} 
-        onToggle={() => isRunning ? sendAction('pause') : sendAction('start')} 
-        onReset={() => sendAction('reset')} 
+        isRunning={isRunning} 
+        onToggle={() => {
+          if (!sendAction) return;
+          isRunning ? sendAction('pause') : sendAction('start');
+        }} 
+        onReset={() => {
+          if (sendAction) sendAction('reset');
+        }} 
       />
 
       {/* Identificador Minimalista */}
