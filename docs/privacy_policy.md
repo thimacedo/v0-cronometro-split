@@ -1,32 +1,35 @@
-# Privacy Policy - SPH_Partilhas (zoom-app)
-**Last Updated: 2026-04-18**
+# Política de Privacidade - SPH Partilhas (Zoom App)
+**Última Atualização: 21 de Abril de 2026**
 
-## 1. Introduction
-SPH_Partilhas ("we," "our," or "the App") is a synchronized timer application designed specifically for the Zoom platform. We are committed to protecting the privacy and security of Zoom users who interact with our service.
+## 1. Introdução
+O **SPH Partilhas** ("nós", "nosso" ou "o App") é uma aplicação de cronômetro sincronizado desenvolvida exclusivamente para a plataforma Zoom. Estamos comprometidos em proteger a privacidade e a segurança dos usuários que utilizam nosso serviço durante reuniões.
 
-## 2. Information We Collect
-To provide synchronization features, we collect the following data types from Zoom:
-*   **Zoom OAuth Tokens:** Access and Refresh tokens required to identify the session and maintain timer continuity.
-*   **Meeting Metadata:** Meeting UUID (Unique Identifier) used to create synchronized "rooms" via WebSockets.
-*   **Usage Data:** Basic interaction logs (Start/Pause/Reset actions) to ensure service stability.
+## 2. Dados que Coletamos
+Para fornecer as funcionalidades de sincronização em tempo real, coletamos apenas os dados estritamente necessários através das APIs oficiais do Zoom:
+*   **Contexto da Reunião (Meeting UUID):** Um identificador único e anônimo da reunião, utilizado para criar "salas" virtuais de sincronização via WebSockets.
+*   **Tokens de Autenticação (OAuth):** Tokens de acesso e atualização necessários para validar a instalação do App e garantir que apenas usuários autorizados acessem o serviço.
+*   **Ações do Usuário:** Registros técnicos básicos de interações com o cronômetro (clicar em Iniciar, Pausar ou Reiniciar) para manter todos os participantes sincronizados.
 
-**Note:** We do **NOT** record audio, video, chat messages, or participant lists.
+**Nota Crítica de Privacidade:** O SPH Partilhas **NÃO** acessa, processa ou armazena áudio, vídeo, conteúdo de chat, transcrições, listas de participantes ou qualquer dado de identificação pessoal (PII) além do estritamente autorizado via escopos OAuth.
 
-## 3. How We Use Your Data
-Data is used exclusively for:
-*   Synchronizing the timer state across all participants in a specific Zoom meeting.
-*   Authenticating the installation and authorization of the App within the Zoom client.
+## 3. Como Utilizamos os Dados
+Os dados coletados são utilizados exclusivamente para:
+*   Manter o estado do cronômetro idêntico para todos os participantes de uma mesma reunião.
+*   Autenticar o acesso e garantir a conformidade com os termos de uso do Zoom Marketplace.
 
-## 4. Data Retention and Deletion
-*   **Retention:** OAuth tokens are stored as long as the App is installed. Meeting UUIDs and timer states are retained for a maximum of 24 hours after the meeting ends.
-*   **Deletion:** Users can uninstall the App via the Zoom Marketplace, which triggers an automatic deauthorization webhook, leading to the immediate deletion of all associated user tokens from our database.
+## 4. Retenção e Exclusão de Dados
+*   **Retenção:** Os identificadores de reunião (Meeting UUID) e estados de cronômetro são mantidos apenas durante a sessão ativa e excluídos automaticamente após 24 horas do encerramento da reunião.
+*   **Desinstalação:** Quando você desinstala o App através do Zoom Marketplace, recebemos uma notificação oficial (webhook de deautenticação) que remove imediatamente todos os tokens associados à sua conta de nossa base de dados.
 
-## 5. Data Security (At Rest and In Transit)
-*   **In Transit:** All communications use TLS 1.2+ (HTTPS/WSS).
-*   **At Rest:** Sensitive tokens are stored in an encrypted PostgreSQL database (AES-256) hosted via Supabase.
+## 5. Segurança da Informação
+*   **Em Trânsito:** Todos os dados trafegam através de conexões criptografadas de última geração (HTTPS e WSS com TLS 1.2+).
+*   **Em Repouso:** Os tokens e metadados técnicos são armazenados em infraestrutura segura e isolada (Supabase/PostgreSQL), com acesso restrito e monitoramento contínuo.
 
-## 6. Third-Party Sharing
-We do **not** sell, trade, or share Zoom user data with third parties for marketing or any other purposes, except as required by law or to provide essential infrastructure services (e.g., Supabase for database hosting).
+## 6. Compartilhamento com Terceiros
+Nós **não** vendemos, trocamos ou compartilhamos dados de usuários do Zoom com terceiros para fins de marketing ou qualquer outro propósito comercial. O compartilhamento ocorre apenas com provedores de infraestrutura técnica essencial (como serviços de hospedagem e banco de dados) sob rigorosos termos de confidencialidade.
 
-## 7. Contact Us
-For privacy-related inquiries, please contact: `support@sph-partilhas.com`
+## 7. Conformidade com o Zoom Marketplace
+Esta política foi escrita em conformidade com as diretrizes de privacidade da Zoom Video Communications, Inc. e destina-se a garantir a total transparência sobre o fluxo de dados no ecossistema Zoom Workplace.
+
+## 8. Contato
+Para dúvidas sobre privacidade ou solicitações de remoção de dados, entre em contato através do e-mail de suporte configurado no seu painel de desenvolvedor.
