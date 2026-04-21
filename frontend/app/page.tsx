@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import zoomSdk from '@zoom/appsdk';
+import zoomSdk from '@zoom/appssdk';
 import { useTimerSocket } from './hooks/useTimerSocket';
 import { TimerDisplay } from './components/TimerDisplay';
 import { TimerControls } from './components/TimerControls';
