@@ -17,39 +17,49 @@ interface SocketMessage {
 export function useTimerSocket(uuid: string | null) {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [phase, setPhase] = useState('Fase 1');
+  const [phase, setPhase] = useState('Partilha'); // 🔷 Ajustado para o novo padrão
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (!uuid) return;
+    if (!uuid || typeof window === 'undefined') return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = window.location.hostname.includes('vercel.app') 
       ? `wss://v0-cronometro-split.onrender.com/ws/${uuid}`
       : `${protocol}//${window.location.host.replace('3000', '8000')}/ws/${uuid}`;
 
-    const ws = new WebSocket(wsUrl);
+    try {
+      const ws = new WebSocket(wsUrl);
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ action: 'request_sync', timestamp: Date.now() / 1000, payload: {} }));
-    };
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ action: 'request_sync', timestamp: Date.now() / 1000, payload: {} }));
+      };
 
-    ws.onmessage = (event) => {
-      const msg: SocketMessage = JSON.parse(event.data);
-      handleMessage(msg);
-    };
+      ws.onmessage = (event) => {
+        try {
+          const msg: SocketMessage = JSON.parse(event.data);
+          if (msg) handleMessage(msg);
+        } catch (e) {
+          console.error("🔷 Erro ao processar mensagem WebSocket:", e);
+        }
+      };
 
-    ws.onclose = () => {
-      setTimeout(() => { /* Lógica de reconexão poderia vir aqui */ }, 3000);
-    };
+      ws.onclose = () => {
+        // Reconexão silenciosa
+      };
 
-    socketRef.current = ws;
-    return () => ws.close();
+      socketRef.current = ws;
+      return () => ws.close();
+    } catch (err) {
+      console.error("🔷 Erro ao conectar WebSocket:", err);
+    }
   }, [uuid]);
 
   const handleMessage = (msg: SocketMessage) => {
+    if (!msg || !msg.payload) return; // 🛡️ Proteção contra mensagens malformadas
+
     const { action, payload, timestamp: serverTimestamp } = msg;
-    const latency = (Date.now() / 1000) - serverTimestamp;
+    const latency = (Date.now() / 1000) - (serverTimestamp || Date.now() / 1000);
 
     if (action === 'start' || action === 'sync_state') {
       const remoteIsRunning = payload.is_running ?? true;
@@ -64,6 +74,7 @@ export function useTimerSocket(uuid: string | null) {
     } else if (action === 'reset') {
       setIsRunning(false);
       setTime(0);
+      if (payload.phase) setPhase(payload.phase);
     }
   };
 

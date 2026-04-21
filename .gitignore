@@ -22,3 +22,5 @@ Thumbs.db
 *.log
 android-studio-*.exe
 *.jpg
+.vercel
+.env*.local
