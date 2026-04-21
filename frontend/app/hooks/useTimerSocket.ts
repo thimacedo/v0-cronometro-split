@@ -1,0 +1,89 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+
+interface TimerPayload {
+  phase?: string;
+  time_elapsed?: number;
+  is_running?: boolean;
+}
+
+interface SocketMessage {
+  action: string;
+  timestamp: number;
+  payload: TimerPayload;
+}
+
+export function useTimerSocket(uuid: string | null) {
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [phase, setPhase] = useState('Fase 1');
+  const socketRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (!uuid) return;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = window.location.hostname.includes('vercel.app') 
+      ? `wss://v0-cronometro-split.onrender.com/ws/${uuid}`
+      : `${protocol}//${window.location.host.replace('3000', '8000')}/ws/${uuid}`;
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ action: 'request_sync', timestamp: Date.now() / 1000, payload: {} }));
+    };
+
+    ws.onmessage = (event) => {
+      const msg: SocketMessage = JSON.parse(event.data);
+      handleMessage(msg);
+    };
+
+    ws.onclose = () => {
+      setTimeout(() => { /* Lógica de reconexão poderia vir aqui */ }, 3000);
+    };
+
+    socketRef.current = ws;
+    return () => ws.close();
+  }, [uuid]);
+
+  const handleMessage = (msg: SocketMessage) => {
+    const { action, payload, timestamp: serverTimestamp } = msg;
+    const latency = (Date.now() / 1000) - serverTimestamp;
+
+    if (action === 'start' || action === 'sync_state') {
+      const remoteIsRunning = payload.is_running ?? true;
+      let remoteTime = payload.time_elapsed ?? 0;
+      if (remoteIsRunning && latency > 0) remoteTime += Math.floor(latency);
+      
+      setIsRunning(remoteIsRunning);
+      setTime(remoteTime);
+      if (payload.phase) setPhase(payload.phase);
+    } else if (action === 'pause') {
+      setIsRunning(false);
+    } else if (action === 'reset') {
+      setIsRunning(false);
+      setTime(0);
+    }
+  };
+
+  const sendAction = (action: string, extraPayload: TimerPayload = {}) => {
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({
+        action,
+        timestamp: Date.now() / 1000,
+        payload: { phase, time_elapsed: time, ...extraPayload }
+      }));
+    }
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRunning) {
+      interval = setInterval(() => setTime((prev) => prev + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  return { time, isRunning, phase, setPhase, sendAction };
+}
