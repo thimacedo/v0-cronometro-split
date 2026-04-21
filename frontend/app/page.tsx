@@ -16,7 +16,13 @@ export default function ZoomAppPage() {
     const initializeZoom = async () => {
       try {
         await zoomSdk.config({
-          capabilities: ['getMeetingContext', 'onMeeting', 'getRunningContext'],
+          capabilities: [
+            'getMeetingContext', 
+            'onMeeting', 
+            'getRunningContext',
+            'getSupportedContexts',
+            'onConnect'
+          ],
         });
         const context = await zoomSdk.getMeetingContext();
         setMeetingUUID(context.meetingUUID || 'browser-test-id');
