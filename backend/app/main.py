@@ -59,11 +59,25 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=[
+            "https://v0-cronometro-split.vercel.app",
+            "https://v0-cronometro-split.onrender.com",
+            "http://localhost:3000"
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def add_security_headers(request: Request, call_next):
+        response = await call_next(request)
+        # 🛡️ Cabeçalhos de Segurança Obrigatórios do Zoom
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' https://*.zoom.us; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.zoom.us; connect-src 'self' https://*.zoom.us wss://v0-cronometro-split.onrender.com;"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["X-Frame-Options"] = "ALLOW-FROM https://*.zoom.us" # Permitir renderização dentro do Zoom
+        return response
 
     @app.middleware("http")
     async def log_requests(request: Request, call_next):
@@ -78,7 +92,7 @@ def create_app() -> FastAPI:
                 <body style="background: #020617; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
                     <div style="text-align: center; border: 1px solid #1e293b; padding: 2rem; border-radius: 1rem; background: #0f172a;">
                         <h1 style="color: #818cf8;">SPH Partilhas - Backend Ready</h1>
-                        <p style="color: #64748b;">O backend está ativo e o túnel ngrok está operando.</p>
+                        <p style="color: #64748b;">O backend está ativo no Render e sincronizado com a Vercel.</p>
                         <hr style="border: 0; border-top: 1px solid #1e293b; margin: 1rem 0;">
                         <a href="/api/auth/login" style="color: #fb7185; text-decoration: none; font-weight: bold;">[ CLIQUE AQUI PARA TESTAR LOGIN ]</a>
                     </div>
