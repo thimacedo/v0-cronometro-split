@@ -7,11 +7,14 @@ import { TimerDisplay } from './components/TimerDisplay';
 import { TimerControls } from './components/TimerControls';
 import { PhaseSelector } from './components/PhaseSelector';
 
+/**
+ * 🔷 SPH Partilhas - Interface de Cronômetro Simplificada
+ * Focada em objetividade e sincronização em tempo real.
+ */
 export default function ZoomAppPage() {
   const [meetingUUID, setMeetingUUID] = useState<string | null>(null);
   const { time, isRunning, phase, setPhase, sendAction } = useTimerSocket(meetingUUID);
 
-  // Inicialização do Zoom SDK
   useEffect(() => {
     const initializeZoom = async () => {
       try {
@@ -20,14 +23,12 @@ export default function ZoomAppPage() {
             'getMeetingContext', 
             'onMeeting', 
             'getRunningContext',
-            'getSupportedContexts',
-            'onConnect'
+            'getSupportedContexts'
           ],
         });
         const context = await zoomSdk.getMeetingContext();
         setMeetingUUID(context.meetingUUID || 'browser-test-id');
       } catch (error) {
-        console.error('🔷 Zoom SDK Fallback:', error);
         setMeetingUUID('dev-local-id');
       }
     };
@@ -35,22 +36,11 @@ export default function ZoomAppPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-950 p-6 text-white font-sans" role="main">
-      <section className="rounded-2xl bg-slate-900 p-8 shadow-2xl border border-slate-800 w-full max-w-sm text-center" aria-labelledby="app-title">
-        <header>
-          <h1 id="app-title" className="text-xl font-bold mb-6 text-indigo-400 tracking-tight uppercase">
-            SPH Partilhas
-          </h1>
-        </header>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-[#020617] p-4 text-white font-sans overflow-hidden">
+      {/* Container Principal Ultra-Objetivo */}
+      <div className="w-full max-w-[280px] flex flex-col items-center">
         
-        <TimerDisplay time={time} phase={phase} />
-
-        <TimerControls 
-          isRunning={isRunning} 
-          onToggle={() => isRunning ? sendAction('pause') : sendAction('start')} 
-          onReset={() => sendAction('reset')} 
-        />
-
+        {/* Selector de Modo (Simplificado) */}
         <PhaseSelector 
           currentPhase={phase} 
           onSelect={(p) => {
@@ -59,13 +49,23 @@ export default function ZoomAppPage() {
           }} 
         />
 
-        <footer className="pt-6 border-t border-slate-800/50">
-          <p className="text-[9px] text-slate-600 uppercase tracking-widest font-bold">Meeting UUID</p>
-          <code className="block mt-1 text-[9px] text-slate-500 font-mono truncate px-4">
-            {meetingUUID || 'INITIALIZING SDK...'}
-          </code>
-        </footer>
-      </section>
+        {/* Display do Tempo (Protagonista) */}
+        <TimerDisplay time={time} />
+
+        {/* Controlos de Ação (Acessibilidade e Rapidez) */}
+        <TimerControls 
+          isRunning={isRunning} 
+          onToggle={() => isRunning ? sendAction('pause') : sendAction('start')} 
+          onReset={() => sendAction('reset')} 
+        />
+
+        {/* Identificador Minimalista */}
+        <div className="mt-8 opacity-20 hover:opacity-100 transition-opacity duration-500">
+           <p className="text-[8px] font-mono tracking-tighter uppercase text-slate-400">
+             Session: {meetingUUID?.split('-')[0] || '...'}
+           </p>
+        </div>
+      </div>
     </main>
   );
 }

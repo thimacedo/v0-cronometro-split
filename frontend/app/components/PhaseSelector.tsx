@@ -6,21 +6,22 @@ interface PhaseSelectorProps {
 }
 
 export function PhaseSelector({ currentPhase, onSelect }: PhaseSelectorProps) {
-  const phases = ['Fase 1', 'Fase 2', 'Pausa'] as const;
+  // Fases simplificadas e objetivas para o SPH Partilhas
+  const phases = ['Partilha', 'Feedback'] as const;
 
   return (
-    <div className="flex justify-center gap-2 mb-8" role="group" aria-label="Seleção de Fase">
+    <div className="flex justify-center gap-4 mb-4" role="group" aria-label="Modo do Cronômetro">
       {phases.map((p) => (
         <button
           key={p}
           onClick={() => onSelect(p)}
-          className={`px-4 py-1.5 text-[9px] font-black rounded-full border transition-all ${
+          className={`text-[10px] font-black tracking-widest uppercase transition-all pb-1 border-b-2 ${
             currentPhase === p 
-              ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' 
-              : 'border-slate-800 text-slate-600 hover:border-slate-600'
+              ? 'border-indigo-500 text-indigo-400' 
+              : 'border-transparent text-slate-600 hover:text-slate-400'
           }`}
         >
-          {p.toUpperCase()}
+          {p}
         </button>
       ))}
     </div>

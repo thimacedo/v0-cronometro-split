@@ -22,7 +22,7 @@ async def websocket_endpoint(websocket: WebSocket, meeting_id: str):
                 is_running = (action == "start")
                 await db_manager.save_timer_state(
                     meeting_id=meeting_id, 
-                    phase=str(payload.get("phase", "Fase 1")), 
+                    phase=str(payload.get("phase", "Partilha")), 
                     time_elapsed=int(payload.get("time_elapsed", 0)), 
                     is_running=is_running
                 )
@@ -42,7 +42,7 @@ async def websocket_endpoint(websocket: WebSocket, meeting_id: str):
                         "timestamp": server_now, 
                         "payload": {
                             "is_running": state.get("is_running", False), 
-                            "phase": state.get("phase", "Fase 1"), 
+                            "phase": state.get("phase", "Partilha"), 
                             "time_elapsed": current_time
                         }
                     }
@@ -50,7 +50,7 @@ async def websocket_endpoint(websocket: WebSocket, meeting_id: str):
                     sync_msg = {
                         "action": "sync_state", 
                         "timestamp": server_now, 
-                        "payload": {"is_running": False, "phase": "Fase 1", "time_elapsed": 0}
+                        "payload": {"is_running": False, "phase": "Partilha", "time_elapsed": 0}
                     }
                 await websocket.send_text(json.dumps(sync_msg))
 

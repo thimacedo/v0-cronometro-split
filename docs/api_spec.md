@@ -1,7 +1,7 @@
 # Especificação da API (API Spec) - SPH_Partilhas
 
 ## Visão Geral
-Esta especificação detalha os endpoints RESTful e as interfaces de comunicação WebSocket para o backend FastAPI do aplicativo de cronómetro sincronizado no Zoom.
+Esta especificação detalha os endpoints RESTful e as interfaces de comunicação WebSocket para o backend FastAPI do aplicativo de cronômetro sincronizado no Zoom.
 
 ## 1. Endpoints REST (HTTP)
 

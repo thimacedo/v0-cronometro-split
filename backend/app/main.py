@@ -18,7 +18,7 @@ logger = setup_logger(__name__)
 def create_app() -> FastAPI:
     app = FastAPI(
         title="SPH_Partilhas Backend", 
-        description="Hub unificado para sincronização de cronómetros no Zoom.",
+        description="Hub unificado para sincronização de cronômetros no Zoom.",
         version="2.0.0"
     )
 

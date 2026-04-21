@@ -2,10 +2,9 @@
 
 interface TimerDisplayProps {
   time: number;
-  phase: string;
 }
 
-export function TimerDisplay({ time, phase }: TimerDisplayProps) {
+export function TimerDisplay({ time }: TimerDisplayProps) {
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -13,11 +12,8 @@ export function TimerDisplay({ time, phase }: TimerDisplayProps) {
   };
 
   return (
-    <div className="mb-8" aria-live="polite">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2 font-black">
-        {phase}
-      </p>
-      <div className="text-7xl font-mono font-black text-white tabular-nums tracking-tighter">
+    <div className="flex flex-col items-center justify-center py-6" aria-live="polite">
+      <div className="text-8xl font-mono font-black text-white tabular-nums tracking-tighter leading-none">
         {formatTime(time)}
       </div>
     </div>

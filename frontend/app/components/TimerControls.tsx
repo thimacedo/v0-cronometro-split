@@ -8,24 +8,24 @@ interface TimerControlsProps {
 
 export function TimerControls({ isRunning, onToggle, onReset }: TimerControlsProps) {
   return (
-    <nav className="grid grid-cols-2 gap-3 mb-6 w-full">
+    <div className="flex flex-col gap-4 w-full">
       <button
         onClick={onToggle}
-        className={`px-6 py-4 rounded-xl font-black text-xs transition-all active:scale-95 ${
+        className={`w-full py-5 rounded-2xl font-black text-sm tracking-widest uppercase transition-all active:scale-95 shadow-lg ${
           isRunning 
-            ? 'bg-rose-500 hover:bg-rose-600 text-rose-50' 
-            : 'bg-emerald-500 hover:bg-emerald-600 text-emerald-50'
+            ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/20' 
+            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/20'
         }`}
       >
-        {isRunning ? 'PAUSAR' : 'INICIAR'}
+        {isRunning ? 'Pausar Partilha' : 'Iniciar Partilha'}
       </button>
 
       <button
         onClick={onReset}
-        className="px-6 py-4 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 font-black text-xs transition-all active:scale-95 border border-slate-700"
+        className="w-full py-3 text-slate-500 font-black text-[10px] tracking-widest uppercase hover:text-slate-300 transition-colors"
       >
-        RESET
+        Reiniciar Cronômetro
       </button>
-    </nav>
+    </div>
   );
 }

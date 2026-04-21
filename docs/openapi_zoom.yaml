@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: SPH_Partilhas - Zoom App Backend
-  description: API de sincronização e gestão de cronómetro colaborativo para o ecossistema Zoom Workplace.
+  description: API de sincronização e gestão de cronômetro colaborativo para o ecossistema Zoom Workplace.
   version: 1.2.0
 servers:
   - url: https://v0-cronometro-split.onrender.com

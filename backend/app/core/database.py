@@ -29,7 +29,7 @@ class SupabaseManager:
         self.memory_db: Dict[str, Dict[str, Any]] = {}
 
     async def save_timer_state(self, meeting_id: str, phase: str, time_elapsed: int, is_running: bool) -> bool:
-        """🔷 Guarda o estado do cronómetro com precisão de milissegundos."""
+        """🔷 Guarda o estado do cronômetro com precisão de milissegundos."""
         server_ts = time.time()
         
         payload = {
