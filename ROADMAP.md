@@ -3,33 +3,29 @@
 ## 📖 Visão Geral
 Aplicativo integrado ao Zoom Marketplace com sincronização via WebSocket e precisão de milissegundos para gerir e compartilhar tempo.
 
-## 📌 Status Atual (v2.0.0)
+## 📌 Status Atual (v2.1.0)
 **Data:** 21 de Abril de 2026
-**Fase:** Produção e Modularização (Concluída)
-**Resumo:** O projeto foi totalmente refatorado e modularizado. O backend (FastAPI) e o frontend (Next.js) estão 100% sincronizados e online.
+**Fase:** Infraestrutura e Governança de Segredos (Ativa)
+**Resumo:** O sistema está modularizado e online. Iniciamos a integração de ferramentas de monitoramento profissional via MCP (Model Context Protocol).
 
-### ✅ Melhorias Implementadas:
-1.  **Arquitetura Modular (Frontend):**
-    *   Criação de Hooks Customizados (`useTimerSocket`) para isolar a lógica de rede.
-    *   Criação de Componentes Atômicos (`TimerDisplay`, `TimerControls`, `PhaseSelector`) para maior performance.
-2.  **Arquitetura Modular (Backend):**
-    *   Divisão em pacotes: `api/` (rotas), `services/` (lógica) e `core/` (infra).
-    *   Gestão de WebSockets isolada no `ConnectionManager`.
-3.  **Segurança e Infra:**
-    *   Cabeçalhos de Segurança (CSP, HSTS, X-Frame) injetados para conformidade Zoom.
-    *   Dockerfile otimizado para deploy no Render.
-    *   Configuração unificada no GitHub para CI/CD automático.
+### ✅ Melhorias Recentes:
+1.  **Refatoração v2.0:** Modularização completa de Frontend e Backend.
+2.  **Segurança Zoom:** Injeção de headers CSP e HSTS.
+3.  **Deploy:** Unificação de repositório e deploy automático (Vercel/Render).
 
 ## 🎯 Próximos Passos
-1. [ ] **Monitoramento via Render MCP:** Ativar a extensão no Gemini CLI para acompanhar logs online.
-2. [ ] **Testes em Dispositivos Móveis:** Validar a experiência de toque e latência no App Zoom (iOS/Android).
-3. [ ] **Submissão Marketplace:** Preencher o questionário técnico do Zoom com base nos novos cabeçalhos de segurança.
+1. [ ] **Integração MCP:** Ativar os servidores MCP do Render e Vercel para monitoramento via terminal.
+2. [ ] **Gestão de Segredos:** Configurar as variáveis de ambiente de produção (`NEXT_PUBLIC_API_URL`) nos painéis online.
+3. [ ] **Limpeza de .env:** Remover chaves obsoletas (`NGROK_URL`) para evitar confusão.
 
-## 🛠️ Configurações de Produção
-- **Frontend:** `https://v0-cronometro-split.vercel.app` (Vercel)
-- **Backend:** `https://v0-cronometro-split.onrender.com` (Render)
-- **Repo:** `thimacedo/v0-cronometro-split`
+## 🛠️ Infraestrutura de Monitoramento (MCP)
+- **Render MCP:** `npx -y @render-oss/render-mcp-server` (Requer `RENDER_API_KEY`)
+- **Vercel MCP:** `npx -y @vercel/mcp-server` (Requer `VERCEL_TOKEN`)
+
+## 🔐 Variáveis de Ambiente Críticas
+- **Frontend (Vercel):** `ZOOM_CLIENT_ID`, `NEXT_PUBLIC_API_URL`
+- **Backend (Render):** `ZOOM_CLIENT_ID`, `ZOOM_CLIENT_SECRET`, `ZOOM_REDIRECT_URL`, `SUPABASE_URL`, `SUPABASE_KEY`
 
 ## 🧩 Stack de Desenvolvimento
 - **Motor Local:** Qwen Local Hub (1.5B via Ollama)
-- **Especialistas:** Zoom App Specialist Skill & Testing Skill
+- **Especialistas:** Zoom App Specialist, Testing & Code-Review
